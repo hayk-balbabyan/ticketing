@@ -22,6 +22,11 @@ class AuthController extends Controller
         return response()->json(['token' => $token]);
     }
 
+    public function user()
+    {
+        return response()->json(auth()->user());
+    }
+    
     public function register(Request $request)
     {
         $user = User::create([

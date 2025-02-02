@@ -1,41 +1,47 @@
 <template>
-    <div class="flex justify-center items-center h-screen bg-gray-100">
-        <div class="bg-white p-8 rounded-lg shadow-md w-96">
-            <h2 class="text-2xl font-bold text-center mb-4">Login</h2>
-            <form @submit.prevent="login" class="space-y-4">
-                <input v-model="email" type="email" placeholder="Email"
-                    class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <input v-model="password" type="password" placeholder="Password"
-                    class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <button type="submit"
-                    class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Login</button>
-            </form>
+    <div class="flex justify-center items-center h-screen">
+        <div class="bg-white p-6 rounded shadow-lg w-96">
+            <h2 class="text-2xl font-bold mb-4">Login</h2>
+
+            <input v-model="email" type="email" placeholder="Email" class="w-full border p-2 mb-2" />
+            <input v-model="password" type="password" placeholder="Password" class="w-full border p-2 mb-4" />
+
+            <button @click="login" class="w-full bg-blue-500 text-white p-2 rounded">Login</button>
+
+            <p class="text-red-500 mt-2" v-if="error">{{ error }}</p>
         </div>
     </div>
 </template>
 
-<script setup>
+<script>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
 import axios from "axios";
+import { useAuthStore } from "../stores/auth.js";
+import { useRouter } from "vue-router";
 
-const email = ref("");
-const password = ref("");
-const authStore = useAuthStore();
-const router = useRouter();
+export default {
+    setup() {
+        const authStore = useAuthStore();
+        const router = useRouter();
+        const email = ref("");
+        const password = ref("");
+        const error = ref("");
 
-const login = async () => {
-    try {
-        const response = await axios.post("/api/login", {
-            email: email.value,
-            password: password.value,
-        });
+        const login = async () => {
+            try {
+                const response = await axios.post("/api/login", {
+                    email: email.value,
+                    password: password.value,
+                });
 
-        authStore.setToken(response.data.token);
-        router.push("/dashboard");
-    } catch (error) {
-        console.error("Login failed", JSON.parse(JSON.stringify(error.response?.data || error.message)));
-    }
-}
+                authStore.setToken(response.data.token);
+                router.push("/dashboard");
+            } catch (err) {
+                error.value = err.response?.data?.message || "Login failed";
+            }
+        };
+
+        return { email, password, error, login };
+    },
+};
 </script>
